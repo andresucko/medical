@@ -1,0 +1,249 @@
+<?php
+require_once 'session_manager.php';
+secureSessionStart();
+
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Regístrate como doctor en el panel médico">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Registro - Panel Médico</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="validation.js"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Crear Cuenta</h1>
+            <p class="text-gray-600 text-sm">Regístrate como doctor</p>
+        </div>
+
+        <form action="register.php" method="POST" class="space-y-4" id="registerForm">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Usuario</label>
+                <input type="text" id="username" name="username" required
+                       class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                       placeholder="Elige un nombre de usuario" maxlength="50" pattern="[a-zA-Z0-9_]{3,50}">
+                <div class="text-xs text-gray-500 mt-1">3-50 caracteres, solo letras, números y guiones bajos</div>
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="email" name="email" required
+                       class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                       placeholder="tu.email@ejemplo.com">
+                <div class="text-xs text-gray-500 mt-1">Usa un email válido</div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                <input type="password" id="password" name="password" required
+                       class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                       placeholder="Crea una contraseña segura" minlength="8">
+                <div class="text-xs text-gray-500 mt-1">
+                    <span id="password-strength" class="text-gray-400">Mínimo 8 caracteres con mayúsculas, minúsculas, números y símbolos</span>
+                </div>
+            </div>
+
+            <div>
+                <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
+                <input type="text" id="nombre" name="nombre" required
+                        class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        placeholder="Tu nombre completo" maxlength="255" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,255}">
+                <div class="text-xs text-gray-500 mt-1">Tu nombre completo (2-255 caracteres)</div>
+            </div>
+
+            <div>
+                <label for="apellido" class="block text-sm font-medium text-gray-700">Apellido</label>
+                <input type="text" id="apellido" name="apellido" required
+                        class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        placeholder="Tu apellido" maxlength="50" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}">
+                <div class="text-xs text-gray-500 mt-1">Tu apellido (2-50 caracteres)</div>
+            </div>
+
+            <div>
+                <label for="especialidad" class="block text-sm font-medium text-gray-700">Especialidad</label>
+                <select id="especialidad" name="especialidad"
+                        class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                    <option value="">Selecciona tu especialidad (opcional)</option>
+                    <option value="Cardiología">Cardiología</option>
+                    <option value="Dermatología">Dermatología</option>
+                    <option value="Ginecología">Ginecología</option>
+                    <option value="Medicina General">Medicina General</option>
+                    <option value="Neurología">Neurología</option>
+                    <option value="Oftalmología">Oftalmología</option>
+                    <option value="Pediatría">Pediatría</option>
+                    <option value="Psiquiatría">Psiquiatría</option>
+                    <option value="Traumatología">Traumatología</option>
+                    <option value="Otra">Otra</option>
+                </select>
+            </div>
+
+            <div class="flex items-start">
+                <input type="checkbox" id="terms" name="terms" required class="mt-1 mr-2">
+                <label for="terms" class="text-xs text-gray-600">
+                    Acepto los <a href="#" class="text-indigo-600 hover:text-indigo-800">Términos y Condiciones</a> y la
+                    <a href="#" class="text-indigo-600 hover:text-indigo-800">Política de Privacidad</a>
+                </label>
+            </div>
+
+            <button type="submit" id="submitBtn"
+                    class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="btnText">Crear Cuenta</span>
+                <span id="btnLoading" class="hidden">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Procesando...
+                </span>
+            </button>
+        </form>
+
+        <div class="text-center mt-6">
+            <p class="text-sm text-gray-600">
+                ¿Ya tienes cuenta? <a href="login.html" class="text-indigo-600 hover:text-indigo-800 font-medium">Inicia Sesión</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Validación en tiempo real de la contraseña
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthText = document.getElementById('password-strength');
+            let strength = 0;
+
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            if (strength < 3) {
+                strengthText.textContent = 'Contraseña débil';
+                strengthText.className = 'text-xs text-red-500 mt-1';
+            } else if (strength < 5) {
+                strengthText.textContent = 'Contraseña media';
+                strengthText.className = 'text-xs text-yellow-500 mt-1';
+            } else {
+                strengthText.textContent = 'Contraseña fuerte';
+                strengthText.className = 'text-xs text-green-500 mt-1';
+            }
+        });
+
+        // Validación del formulario
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const nombre = document.getElementById('nombre').value;
+            const apellido = document.getElementById('apellido').value;
+            const terms = document.getElementById('terms').checked;
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+
+            // Mostrar loading state
+            submitBtn.disabled = true;
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+
+            // Validaciones
+            if (username.length < 3) {
+                alert('El usuario debe tener al menos 3 caracteres');
+                e.preventDefault();
+                resetButton();
+                return false;
+            }
+
+            if (!validateEmail(email)) {
+                alert('Por favor ingresa un email válido');
+                e.preventDefault();
+                resetButton();
+                return false;
+            }
+
+            if (password.length < 8) {
+                alert('La contraseña debe tener al menos 8 caracteres');
+                e.preventDefault();
+                resetButton();
+                return false;
+            }
+
+            if (nombre.length < 2 || apellido.length < 2) {
+                alert('El nombre y apellido deben tener al menos 2 caracteres');
+                e.preventDefault();
+                resetButton();
+                return false;
+            }
+
+            if (!terms) {
+                alert('Debes aceptar los términos y condiciones');
+                e.preventDefault();
+                resetButton();
+                return false;
+            }
+
+            return true;
+        });
+
+        function resetButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+
+            submitBtn.disabled = false;
+            btnText.classList.remove('hidden');
+            btnLoading.classList.add('hidden');
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Mostrar/ocultar contraseña
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.innerHTML = '👁️';
+            toggleBtn.className = 'absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700';
+            toggleBtn.style.background = 'none';
+            toggleBtn.style.border = 'none';
+            toggleBtn.style.cursor = 'pointer';
+
+            passwordInput.parentElement.style.position = 'relative';
+            passwordInput.parentElement.appendChild(toggleBtn);
+
+            toggleBtn.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleBtn.innerHTML = '🙈';
+                } else {
+                    passwordInput.type = 'password';
+                    toggleBtn.innerHTML = '👁️';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
